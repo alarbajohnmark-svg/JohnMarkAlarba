@@ -58,7 +58,7 @@
             border-radius: 5px;
         }
 
-        #result, #greeting {
+        #result, #greeting, #customResult {
             margin-top: 20px;
             padding: 12px;
             border: 1px solid #ddd;
@@ -70,6 +70,11 @@
             margin: 8px 0;
         }
 
+        #customResult {
+            background-color: #f8fafc;
+            white-space: pre-wrap;
+        }
+
         .subtitle {
             text-align: center;
             color: #666;
@@ -79,16 +84,24 @@
 
 <body>
     <h1>Student API Interface</h1>
-    <p class="subtitle">Retrieve student information and test the Greeting API.</p>
+    <p class="subtitle">
+        Retrieve student information and test your custom APIs.
+    </p>
 
+    <!-- SECTION 1: STUDENT INFORMATION -->
     <div class="card">
         <h2>Student Information</h2>
 
-        <button onclick="loadStudent()">Load Student Information</button>
+        <button onclick="loadStudent()">
+            Load Student Information
+        </button>
 
-        <div id="result">Click the button to load student details.</div>
+        <div id="result">
+            Click the button to load student details.
+        </div>
     </div>
 
+    <!-- SECTION 2: GREETING API -->
     <div class="card">
         <h2>Greeting API</h2>
 
@@ -105,53 +118,130 @@
         <p id="greeting">Your greeting will appear here.</p>
     </div>
 
+    <!-- SECTION 3: ADDITIONAL CUSTOM API TASK -->
+    <div class="card">
+        <h2>My Custom API Endpoint</h2>
+
+        <p>
+            Click the button to call your custom Flask endpoint
+            and display its JSON response.
+        </p>
+
+        <button onclick="loadCustomAPI()">
+            Fetch Custom API Data
+        </button>
+
+        <pre id="customResult">Your custom API response will appear here.</pre>
+    </div>
+
     <script>
+        // SECTION 1: LOAD STUDENT INFORMATION
         function loadStudent() {
+            const result = document.getElementById('result');
+            result.textContent = 'Loading student information...';
+
             fetch('/student')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Failed to load student information');
+                        throw new Error(
+                            'Failed to load student information'
+                        );
                     }
                     return response.json();
                 })
                 .then(data => {
-                    document.getElementById('result').innerHTML =
-                        '<p><b>Student ID:</b> ' + data.student_id + '</p>' +
-                        '<p><b>Name:</b> ' + data.name + '</p>' +
-                        '<p><b>Program:</b> ' + data.program + '</p>' +
-                        '<p><b>Year:</b> ' + data.year + '</p>' +
-                        '<p><b>Section:</b> ' + data.section + '</p>';
+                    result.replaceChildren();
+
+                    const fields = [
+                        ['Student ID', data.student_id],
+                        ['Name', data.name],
+                        ['Program', data.program],
+                        ['Year', data.year],
+                        ['Section', data.section]
+                    ];
+
+                    fields.forEach(([label, value]) => {
+                        const p = document.createElement('p');
+                        const b = document.createElement('b');
+
+                        b.textContent = label + ': ';
+                        p.appendChild(b);
+                        p.appendChild(
+                            document.createTextNode(
+                                value === undefined ? 'Not provided' : value
+                            )
+                        );
+
+                        result.appendChild(p);
+                    });
                 })
                 .catch(error => {
-                    document.getElementById('result').innerText =
+                    result.textContent =
                         'Unable to retrieve student data.';
                     console.error(error);
                 });
         }
 
+        // SECTION 2: GREETING API
         function sayHello() {
-            const name = document.getElementById('nameInput').value.trim();
+            const name = document
+                .getElementById('nameInput')
+                .value.trim();
+
+            const greeting = document.getElementById('greeting');
 
             if (!name) {
-                document.getElementById('greeting').innerText =
+                greeting.textContent =
                     'Please enter your first name.';
                 return;
             }
 
+            greeting.textContent = 'Loading greeting...';
+
             fetch('/hello?name=' + encodeURIComponent(name))
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Failed to retrieve greeting');
+                        throw new Error(
+                            'Failed to retrieve greeting'
+                        );
                     }
                     return response.json();
                 })
                 .then(data => {
-                    document.getElementById('greeting').innerText =
-                        data.message;
+                    greeting.textContent = data.message;
                 })
                 .catch(error => {
-                    document.getElementById('greeting').innerText =
+                    greeting.textContent =
                         'Unable to retrieve greeting.';
+                    console.error(error);
+                });
+        }
+
+        // SECTION 3: CUSTOM API ENDPOINT
+        function loadCustomAPI() {
+            const customResult =
+                document.getElementById('customResult');
+
+            customResult.textContent =
+                'Loading custom API data...';
+
+            // Calls your own Flask /hello endpoint.
+            fetch('/hello?name=' + encodeURIComponent('John Mark'))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(
+                            'Custom API request failed'
+                        );
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    customResult.textContent =
+                        JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    customResult.textContent =
+                        'Unable to retrieve custom API data.';
                     console.error(error);
                 });
         }
