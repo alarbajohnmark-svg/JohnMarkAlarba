@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student API Interface</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #222;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #1e3a5f;
+            text-align: center;
+        }
+
+        h2 {
+            color: #2c5282;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        button {
+            padding: 10px 16px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 350px;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #result, #greeting {
+            margin-top: 20px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-wrap: anywhere;
+        }
+
+        #result p {
+            margin: 8px 0;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Student API Interface</h1>
+    <p class="subtitle">Retrieve student information and test the Greeting API.</p>
+
+    <div class="card">
+        <h2>Student Information</h2>
+
+        <button onclick="loadStudent()">Load Student Information</button>
+
+        <div id="result">Click the button to load student details.</div>
+    </div>
+
+    <div class="card">
+        <h2>Greeting API</h2>
+
+        <input
+            type="text"
+            id="nameInput"
+            placeholder="Enter your first name"
+        >
+
+        <br>
+
+        <button onclick="sayHello()">Say Hello</button>
+
+        <p id="greeting">Your greeting will appear here.</p>
+    </div>
+
+    <script>
+        function loadStudent() {
+            fetch('/student')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load student information');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('result').innerHTML =
+                        '<p><b>Student ID:</b> ' + data.student_id + '</p>' +
+                        '<p><b>Name:</b> ' + data.name + '</p>' +
+                        '<p><b>Program:</b> ' + data.program + '</p>' +
+                        '<p><b>Year:</b> ' + data.year + '</p>' +
+                        '<p><b>Section:</b> ' + data.section + '</p>';
+                })
+                .catch(error => {
+                    document.getElementById('result').innerText =
+                        'Unable to retrieve student data.';
+                    console.error(error);
+                });
+        }
+
+        function sayHello() {
+            const name = document.getElementById('nameInput').value.trim();
+
+            if (!name) {
+                document.getElementById('greeting').innerText =
+                    'Please enter your first name.';
+                return;
+            }
+
+            fetch('/hello?name=' + encodeURIComponent(name))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to retrieve greeting');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('greeting').innerText =
+                        data.message;
+                })
+                .catch(error => {
+                    document.getElementById('greeting').innerText =
+                        'Unable to retrieve greeting.';
+                    console.error(error);
+                });
+        }
+    </script>
+</body>
+</html>
