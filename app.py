@@ -5,20 +5,26 @@ from flask import Flask, jsonify, request, render_template
 app = Flask(__name__)
 
 
-# Database connection
+# ==========================================
+# DATABASE CONNECTION
+# ==========================================
 def get_db_connection():
     conn = sqlite3.connect('students.db')
     conn.row_factory = sqlite3.Row
     return conn
 
 
-# Home page
+# ==========================================
+# HOME PAGE
+# ==========================================
 @app.route('/')
 def home():
     return render_template('index.html')
 
 
-# Get one sample student (existing route)
+# ==========================================
+# GET ONE SAMPLE STUDENT
+# ==========================================
 @app.route('/student')
 def get_student():
     return jsonify({
@@ -30,42 +36,82 @@ def get_student():
     })
 
 
-# Hello API (existing route)
+# ==========================================
+# GREETING API
+# ==========================================
 @app.route('/hello')
 def say_hello():
     name = request.args.get('name', 'Student')
+
     return jsonify({
         "message": f"Hello, {name}!"
     })
 
 
-# Get all students from the database
+# ==========================================
+# GET ALL STUDENTS FROM DATABASE
+# ==========================================
 @app.route('/students')
 def get_students():
     conn = get_db_connection()
-    students = conn.execute(
-        'SELECT * FROM students'
-    ).fetchall()
-    conn.close()
 
-    return jsonify([dict(student) for student in students])
+    try:
+        students = conn.execute(
+            'SELECT * FROM students ORDER BY id'
+        ).fetchall()
+
+        return jsonify([dict(student) for student in students])
+
+    finally:
+        conn.close()
 
 
-# Get one student by database ID
+# ==========================================
+# GET ONE STUDENT BY DATABASE ID
+# ==========================================
 @app.route('/students/<int:id>')
 def get_student_by_id(id):
     conn = get_db_connection()
-    student = conn.execute(
-        'SELECT * FROM students WHERE id = ?',
-        (id,)
-    ).fetchone()
-    conn.close()
 
-    if student is None:
-        return jsonify({"error": "Student not found"}), 404
+    try:
+        student = conn.execute(
+            'SELECT * FROM students WHERE id = ?',
+            (id,)
+        ).fetchone()
 
-    return jsonify(dict(student))
+        if student is None:
+            return jsonify({
+                "error": "Student not found"
+            }), 404
+
+        return jsonify(dict(student))
+
+    finally:
+        conn.close()
 
 
+# ==========================================
+# ADDITIONAL API: GET STUDENTS BY YEAR LEVEL
+# Example: /students/year/2
+# ==========================================
+@app.route('/students/year/<int:year>')
+def get_students_by_year(year):
+    conn = get_db_connection()
+
+    try:
+        students = conn.execute(
+            'SELECT * FROM students WHERE year = ? ORDER BY id',
+            (year,)
+        ).fetchall()
+
+        return jsonify([dict(student) for student in students])
+
+    finally:
+        conn.close()
+
+
+# ==========================================
+# RUN FLASK APPLICATION
+# ==========================================
 if __name__ == '__main__':
     app.run(debug=True)

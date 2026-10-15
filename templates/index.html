@@ -67,7 +67,6 @@
         }
 
         input {
-            box-sizing: border-box;
             width: 100%;
             max-width: 350px;
             padding: 10px;
@@ -77,10 +76,20 @@
             font-size: 14px;
         }
 
+        select {
+            padding: 10px;
+            margin: 8px 5px 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: white;
+            font-size: 14px;
+        }
+
         #result,
         #greeting,
         #customResult,
-        #studentList {
+        #studentList,
+        #yearResults {
             margin-top: 20px;
             padding: 12px;
             border: 1px solid #ddd;
@@ -89,7 +98,8 @@
         }
 
         #result p,
-        #studentList p {
+        #studentList p,
+        #yearResults p {
             margin: 8px 0;
             padding: 10px;
             background: #f8fafc;
@@ -149,7 +159,6 @@
         Retrieve student information and test your custom APIs.
     </p>
 
-
     <!-- SECTION 1: STUDENT INFORMATION -->
     <div class="card">
         <h2>Student Information</h2>
@@ -164,7 +173,6 @@
             Click the button to load student details.
         </div>
     </div>
-
 
     <!-- SECTION 2: GREETING API -->
     <div class="card">
@@ -189,7 +197,6 @@
         </p>
     </div>
 
-
     <!-- SECTION 3: CUSTOM API ENDPOINT -->
     <div class="card">
         <h2>My Custom API Endpoint</h2>
@@ -205,7 +212,6 @@
 
         <pre id="customResult" aria-live="polite">Your custom API response will appear here.</pre>
     </div>
-
 
     <!-- SECTION 4: STUDENTS FROM DATABASE -->
     <div class="card">
@@ -226,14 +232,33 @@
         <div id="studentCount" class="student-count"></div>
     </div>
 
+    <!-- SECTION 5: FILTER STUDENTS BY YEAR -->
+    <div class="card">
+        <h2>Students by Year Level</h2>
+
+        <p>Choose a year level to retrieve matching students.</p>
+
+        <select id="yearSelect">
+            <option value="1">Year 1</option>
+            <option value="2" selected>Year 2</option>
+            <option value="3">Year 3</option>
+            <option value="4">Year 4</option>
+        </select>
+
+        <button onclick="loadStudentsByYear()">
+            Find Students
+        </button>
+
+        <div id="yearResults" aria-live="polite">
+            Filtered student records will appear here.
+        </div>
+    </div>
 
     <footer>
         Student API Interface &copy; 2026
     </footer>
 
-
     <script>
-
         // SECTION 1: LOAD STUDENT INFORMATION
         async function loadStudent() {
             const result = document.getElementById('result');
@@ -284,7 +309,6 @@
             }
         }
 
-
         // SECTION 2: GREETING API
         async function sayHello() {
             const name = document
@@ -320,7 +344,6 @@
             }
         }
 
-
         // SECTION 3: CUSTOM API ENDPOINT
         // Retrieves all students and displays the JSON response.
         async function loadCustomAPI() {
@@ -348,8 +371,7 @@
             }
         }
 
-
-        // SECTION 4: DISPLAY DATABASE RECORDS
+        // SECTION 4: DISPLAY ALL DATABASE RECORDS
         async function loadStudents() {
             const studentList =
                 document.getElementById('studentList');
@@ -413,6 +435,66 @@
             }
         }
 
+        // SECTION 5: FILTER STUDENTS BY YEAR
+        async function loadStudentsByYear() {
+            const year =
+                document.getElementById('yearSelect').value;
+
+            const results =
+                document.getElementById('yearResults');
+
+            results.textContent = 'Loading students...';
+
+            try {
+                const response = await fetch(
+                    '/students/year/' + year
+                );
+
+                if (!response.ok) {
+                    throw new Error('Unable to retrieve students.');
+                }
+
+                const students = await response.json();
+
+                if (!Array.isArray(students)) {
+                    throw new Error('Invalid student data received.');
+                }
+
+                results.replaceChildren();
+
+                if (students.length === 0) {
+                    results.textContent =
+                        'No students found for this year level.';
+                    return;
+                }
+
+                students.forEach(student => {
+                    const p = document.createElement('p');
+                    const bold = document.createElement('b');
+
+                    bold.textContent =
+                        (student.student_id ?? 'No ID') + ' - ';
+
+                    p.appendChild(bold);
+
+                    p.appendChild(
+                        document.createTextNode(
+                            (student.name ?? 'Unknown') +
+                            ' | ' + (student.program ?? 'N/A') +
+                            ' | Year ' + (student.year ?? 'N/A') +
+                            ' | Section ' + (student.section ?? 'N/A')
+                        )
+                    );
+
+                    results.appendChild(p);
+                });
+
+            } catch (error) {
+                results.textContent =
+                    'Unable to retrieve student records.';
+                console.error(error);
+            }
+        }
     </script>
 
 </body>
