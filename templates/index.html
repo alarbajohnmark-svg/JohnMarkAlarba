@@ -4,12 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Student API Interface</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            max-width: 700px;
+            max-width: 800px;
             margin: 40px auto;
             padding: 20px;
             background-color: #f4f6f9;
@@ -24,6 +29,13 @@
 
         h2 {
             color: #2c5282;
+            margin-top: 0;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
         }
 
         .card {
@@ -42,10 +54,16 @@
             background-color: #2563eb;
             color: white;
             cursor: pointer;
+            font-size: 14px;
         }
 
         button:hover {
             background-color: #1d4ed8;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
         }
 
         input {
@@ -56,9 +74,13 @@
             margin: 8px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+            font-size: 14px;
         }
 
-        #result, #greeting, #customResult {
+        #result,
+        #greeting,
+        #customResult,
+        #studentList {
             margin-top: 20px;
             padding: 12px;
             border: 1px solid #ddd;
@@ -66,44 +88,89 @@
             overflow-wrap: anywhere;
         }
 
-        #result p {
+        #result p,
+        #studentList p {
             margin: 8px 0;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 5px;
         }
 
         #customResult {
             background-color: #f8fafc;
             white-space: pre-wrap;
+            overflow-x: auto;
         }
 
-        .subtitle {
+        .status {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+
+        .student-count {
+            color: #166534;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        footer {
             text-align: center;
-            color: #666;
+            color: #777;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                margin: 15px auto;
+                padding: 12px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
         }
     </style>
 </head>
 
 <body>
+
     <h1>Student API Interface</h1>
+
     <p class="subtitle">
         Retrieve student information and test your custom APIs.
     </p>
+
 
     <!-- SECTION 1: STUDENT INFORMATION -->
     <div class="card">
         <h2>Student Information</h2>
 
+        <p>Click the button to load student details.</p>
+
         <button onclick="loadStudent()">
             Load Student Information
         </button>
 
-        <div id="result">
+        <div id="result" aria-live="polite">
             Click the button to load student details.
         </div>
     </div>
 
+
     <!-- SECTION 2: GREETING API -->
     <div class="card">
         <h2>Greeting API</h2>
+
+        <p>Enter your name to receive a greeting.</p>
 
         <input
             type="text"
@@ -113,12 +180,17 @@
 
         <br>
 
-        <button onclick="sayHello()">Say Hello</button>
+        <button onclick="sayHello()">
+            Say Hello
+        </button>
 
-        <p id="greeting">Your greeting will appear here.</p>
+        <p id="greeting" aria-live="polite">
+            Your greeting will appear here.
+        </p>
     </div>
 
-    <!-- SECTION 3: ADDITIONAL CUSTOM API TASK -->
+
+    <!-- SECTION 3: CUSTOM API ENDPOINT -->
     <div class="card">
         <h2>My Custom API Endpoint</h2>
 
@@ -131,59 +203,90 @@
             Fetch Custom API Data
         </button>
 
-        <pre id="customResult">Your custom API response will appear here.</pre>
+        <pre id="customResult" aria-live="polite">Your custom API response will appear here.</pre>
     </div>
 
+
+    <!-- SECTION 4: STUDENTS FROM DATABASE -->
+    <div class="card">
+        <h2>Students from Database</h2>
+
+        <p>
+            Load and display all student records stored in SQLite.
+        </p>
+
+        <button onclick="loadStudents()">
+            Load Students
+        </button>
+
+        <div id="studentList" aria-live="polite">
+            Student records will appear here.
+        </div>
+
+        <div id="studentCount" class="student-count"></div>
+    </div>
+
+
+    <footer>
+        Student API Interface &copy; 2026
+    </footer>
+
+
     <script>
+
         // SECTION 1: LOAD STUDENT INFORMATION
-        function loadStudent() {
+        async function loadStudent() {
             const result = document.getElementById('result');
+
             result.textContent = 'Loading student information...';
 
-            fetch('/student')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(
-                            'Failed to load student information'
-                        );
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    result.replaceChildren();
+            try {
+                const response = await fetch('/student');
 
-                    const fields = [
-                        ['Student ID', data.student_id],
-                        ['Name', data.name],
-                        ['Program', data.program],
-                        ['Year', data.year],
-                        ['Section', data.section]
-                    ];
+                if (!response.ok) {
+                    throw new Error('Failed to load student information.');
+                }
 
-                    fields.forEach(([label, value]) => {
-                        const p = document.createElement('p');
-                        const b = document.createElement('b');
+                const data = await response.json();
 
-                        b.textContent = label + ': ';
-                        p.appendChild(b);
-                        p.appendChild(
-                            document.createTextNode(
-                                value === undefined ? 'Not provided' : value
-                            )
-                        );
+                result.replaceChildren();
 
-                        result.appendChild(p);
-                    });
-                })
-                .catch(error => {
-                    result.textContent =
-                        'Unable to retrieve student data.';
-                    console.error(error);
+                const fields = [
+                    ['Student ID', data.student_id],
+                    ['Name', data.name],
+                    ['Program', data.program],
+                    ['Year', data.year],
+                    ['Section', data.section]
+                ];
+
+                fields.forEach(([label, value]) => {
+                    const p = document.createElement('p');
+                    const bold = document.createElement('b');
+
+                    bold.textContent = label + ': ';
+                    p.appendChild(bold);
+
+                    p.appendChild(
+                        document.createTextNode(
+                            value === undefined || value === null
+                                ? 'Not provided'
+                                : String(value)
+                        )
+                    );
+
+                    result.appendChild(p);
                 });
+
+            } catch (error) {
+                result.textContent =
+                    'Unable to retrieve student data.';
+                console.error(error);
+            }
         }
 
+
         // SECTION 2: GREETING API
-        function sayHello() {
+        async function sayHello() {
             const name = document
                 .getElementById('nameInput')
                 .value.trim();
@@ -191,60 +294,126 @@
             const greeting = document.getElementById('greeting');
 
             if (!name) {
-                greeting.textContent =
-                    'Please enter your first name.';
+                greeting.textContent = 'Please enter your name.';
                 return;
             }
 
             greeting.textContent = 'Loading greeting...';
 
-            fetch('/hello?name=' + encodeURIComponent(name))
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(
-                            'Failed to retrieve greeting'
-                        );
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    greeting.textContent = data.message;
-                })
-                .catch(error => {
-                    greeting.textContent =
-                        'Unable to retrieve greeting.';
-                    console.error(error);
-                });
+            try {
+                const response = await fetch(
+                    '/hello?name=' + encodeURIComponent(name)
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to retrieve greeting.');
+                }
+
+                const data = await response.json();
+
+                greeting.textContent = data.message;
+
+            } catch (error) {
+                greeting.textContent =
+                    'Unable to retrieve greeting.';
+                console.error(error);
+            }
         }
 
+
         // SECTION 3: CUSTOM API ENDPOINT
-        function loadCustomAPI() {
+        // Retrieves all students and displays the JSON response.
+        async function loadCustomAPI() {
             const customResult =
                 document.getElementById('customResult');
 
-            customResult.textContent =
-                'Loading custom API data...';
+            customResult.textContent = 'Loading custom API data...';
 
-            // Calls your own Flask /hello endpoint.
-            fetch('/hello?name=' + encodeURIComponent('John Mark'))
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(
-                            'Custom API request failed'
-                        );
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    customResult.textContent =
-                        JSON.stringify(data, null, 2);
-                })
-                .catch(error => {
-                    customResult.textContent =
-                        'Unable to retrieve custom API data.';
-                    console.error(error);
-                });
+            try {
+                const response = await fetch('/students');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch student records.');
+                }
+
+                const data = await response.json();
+
+                customResult.textContent =
+                    JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                customResult.textContent =
+                    'Unable to retrieve custom API data.';
+                console.error(error);
+            }
         }
+
+
+        // SECTION 4: DISPLAY DATABASE RECORDS
+        async function loadStudents() {
+            const studentList =
+                document.getElementById('studentList');
+
+            const studentCount =
+                document.getElementById('studentCount');
+
+            studentList.textContent = 'Loading student records...';
+            studentCount.textContent = '';
+
+            try {
+                const response = await fetch('/students');
+
+                if (!response.ok) {
+                    throw new Error('Failed to retrieve student records.');
+                }
+
+                const data = await response.json();
+
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid student data received.');
+                }
+
+                studentList.replaceChildren();
+
+                if (data.length === 0) {
+                    studentList.textContent =
+                        'No student records found.';
+                    return;
+                }
+
+                data.forEach(student => {
+                    const p = document.createElement('p');
+                    const bold = document.createElement('b');
+
+                    bold.textContent =
+                        (student.student_id ?? 'No ID') + ' - ';
+
+                    p.appendChild(bold);
+
+                    p.appendChild(
+                        document.createTextNode(
+                            (student.name ?? 'Unknown') +
+                            ' | ' + (student.program ?? 'N/A') +
+                            ' | Year ' + (student.year ?? 'N/A') +
+                            ' | Section ' + (student.section ?? 'N/A')
+                        )
+                    );
+
+                    studentList.appendChild(p);
+                });
+
+                studentCount.textContent =
+                    'Total students: ' + data.length;
+
+            } catch (error) {
+                studentList.textContent =
+                    'Unable to retrieve student records.';
+                studentCount.textContent = '';
+                console.error(error);
+            }
+        }
+
     </script>
+
 </body>
 </html>
