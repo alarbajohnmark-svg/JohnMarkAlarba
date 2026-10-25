@@ -115,6 +115,7 @@
         }
 
         .table-wrapper {
+            width: 100%;
             overflow-x: auto;
         }
 
@@ -187,6 +188,7 @@
 <body>
 
     <h1>Student API Interface</h1>
+
     <p class="subtitle">
         Retrieve student information and manage student records using Flask and SQLite.
     </p>
@@ -196,7 +198,9 @@
         <h2>Student Information</h2>
         <p>Retrieve the sample student information from your API.</p>
 
-        <button onclick="loadStudent()">Load Student Information</button>
+        <button type="button" onclick="loadStudent()">
+            Load Student Information
+        </button>
 
         <div id="result" class="result-box">
             Student information will appear here.
@@ -208,9 +212,13 @@
         <h2>Greeting API</h2>
 
         <label for="nameInput">Your Name</label>
-        <input type="text" id="nameInput" placeholder="Enter your name">
+        <input
+            type="text"
+            id="nameInput"
+            placeholder="Enter your name"
+        >
 
-        <button onclick="sayHello()">Say Hello</button>
+        <button type="button" onclick="sayHello()">Say Hello</button>
 
         <p id="greeting" class="result-box">
             Your greeting will appear here.
@@ -222,7 +230,9 @@
         <h2>My Custom API Endpoint</h2>
         <p>Retrieve your own student records as JSON.</p>
 
-        <button onclick="loadCustomAPI()">Fetch Custom API Data</button>
+        <button type="button" onclick="loadCustomAPI()">
+            Fetch Custom API Data
+        </button>
 
         <pre id="customResult">Your API response will appear here.</pre>
     </div>
@@ -308,9 +318,15 @@
     <!-- SECTION 5: MY RECORDS -->
     <div class="card">
         <h2>My Records - Students from Database</h2>
-        <p><strong>Data Source:</strong> Your own Flask and SQLite database.</p>
 
-        <button onclick="loadStudents()">Refresh Student List</button>
+        <p>
+            <strong>Data Source:</strong>
+            Your own Flask and SQLite database.
+        </p>
+
+        <button type="button" onclick="loadStudents()">
+            Refresh Student List
+        </button>
 
         <div id="studentList" class="table-wrapper">
             Loading student records...
@@ -324,6 +340,7 @@
         <h2>Students by Year Level</h2>
 
         <label for="yearSelect">Choose Year Level</label>
+
         <select id="yearSelect">
             <option value="1">Year 1</option>
             <option value="2" selected>Year 2</option>
@@ -331,7 +348,9 @@
             <option value="4">Year 4</option>
         </select>
 
-        <button onclick="loadStudentsByYear()">Find Students</button>
+        <button type="button" onclick="loadStudentsByYear()">
+            Find Students
+        </button>
 
         <div id="yearResults" class="result-box">
             Filtered students will appear here.
@@ -347,13 +366,10 @@
             Your classmate's public Render API.
         </p>
 
-        <label for="classmateApiUrl">Classmate's API URL</label>
-
-        <input
-            type="url"
-            id="classmateApiUrl"
-            placeholder="https://CLASSMATE-APP.onrender.com/api/students"
-        >
+        <p>
+            Click the button below to retrieve your classmate's records
+            through your Flask server.
+        </p>
 
         <button type="button" onclick="loadClassmateRecords()">
             Load Classmate's Records
@@ -362,7 +378,7 @@
         <div id="classmateMessage" aria-live="polite"></div>
 
         <div id="classmateRecords" class="table-wrapper">
-            Enter your classmate's API URL and click the button.
+            Classmate records will appear here.
         </div>
     </div>
 
@@ -388,7 +404,9 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Unable to load student.');
+                    throw new Error(
+                        data.error || 'Unable to load student.'
+                    );
                 }
 
                 result.textContent = JSON.stringify(data, null, 2);
@@ -399,7 +417,10 @@
 
         // SECTION 2: GREETING API
         async function sayHello() {
-            const name = document.getElementById('nameInput').value.trim();
+            const name = document
+                .getElementById('nameInput')
+                .value.trim();
+
             const greeting = document.getElementById('greeting');
 
             if (!name) {
@@ -415,7 +436,9 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Unable to get greeting.');
+                    throw new Error(
+                        data.error || 'Unable to get greeting.'
+                    );
                 }
 
                 greeting.textContent = data.message;
@@ -434,7 +457,9 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Unable to load API data.');
+                    throw new Error(
+                        data.error || 'Unable to load API data.'
+                    );
                 }
 
                 output.textContent = JSON.stringify(data, null, 2);
@@ -453,11 +478,17 @@
                     document.getElementById('recordId').value;
 
                 const studentData = {
-                    student_id: document.getElementById('student_id').value.trim(),
-                    name: document.getElementById('name').value.trim(),
-                    program: document.getElementById('program').value.trim(),
-                    year: Number(document.getElementById('year').value),
-                    section: document.getElementById('section').value.trim()
+                    student_id: document
+                        .getElementById('student_id').value.trim(),
+                    name: document
+                        .getElementById('name').value.trim(),
+                    program: document
+                        .getElementById('program').value.trim(),
+                    year: Number(
+                        document.getElementById('year').value
+                    ),
+                    section: document
+                        .getElementById('section').value.trim()
                 };
 
                 const isEditing = recordId !== '';
@@ -468,7 +499,9 @@
 
                 const method = isEditing ? 'PUT' : 'POST';
 
-                const submitBtn = document.getElementById('submitBtn');
+                const submitBtn =
+                    document.getElementById('submitBtn');
+
                 submitBtn.disabled = true;
 
                 try {
@@ -483,13 +516,17 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(data.error || 'The operation failed.');
+                        throw new Error(
+                            data.error || 'The operation failed.'
+                        );
                     }
 
                     showMessage(
-                        data.message || (isEditing
-                            ? 'Student updated successfully.'
-                            : 'Student added successfully.')
+                        data.message || (
+                            isEditing
+                                ? 'Student updated successfully.'
+                                : 'Student added successfully.'
+                        )
                     );
 
                     resetForm();
@@ -576,15 +613,19 @@
                     const actions = document.createElement('td');
 
                     const editButton = document.createElement('button');
+                    editButton.type = 'button';
                     editButton.textContent = 'Edit';
                     editButton.className = 'edit-btn';
+
                     editButton.addEventListener('click', () => {
                         editStudent(student);
                     });
 
                     const deleteButton = document.createElement('button');
+                    deleteButton.type = 'button';
                     deleteButton.textContent = 'Delete';
                     deleteButton.className = 'delete-btn';
+
                     deleteButton.addEventListener('click', () => {
                         deleteStudent(student.id, student.name);
                     });
@@ -597,7 +638,8 @@
                 table.append(thead, tbody);
                 list.appendChild(table);
 
-                count.textContent = 'Total students: ' + students.length;
+                count.textContent =
+                    'Total students: ' + students.length;
 
             } catch (error) {
                 list.textContent = error.message;
@@ -608,13 +650,20 @@
         // FILL FORM WITH SELECTED STUDENT
         function editStudent(student) {
             document.getElementById('recordId').value = student.id;
-            document.getElementById('student_id').value = student.student_id;
-            document.getElementById('name').value = student.name;
-            document.getElementById('program').value = student.program;
-            document.getElementById('year').value = String(student.year);
-            document.getElementById('section').value = student.section;
+            document.getElementById('student_id').value =
+                student.student_id ?? '';
+            document.getElementById('name').value =
+                student.name ?? '';
+            document.getElementById('program').value =
+                student.program ?? '';
+            document.getElementById('year').value =
+                String(student.year ?? '');
+            document.getElementById('section').value =
+                student.section ?? '';
 
-            document.getElementById('submitBtn').textContent = 'Update Student';
+            document.getElementById('submitBtn').textContent =
+                'Update Student';
+
             document.getElementById('cancelBtn').hidden = false;
 
             showMessage(
@@ -632,10 +681,14 @@
         function resetForm() {
             document.getElementById('studentForm').reset();
             document.getElementById('recordId').value = '';
-            document.getElementById('submitBtn').textContent = 'Add Student';
+
+            document.getElementById('submitBtn').textContent =
+                'Add Student';
+
             document.getElementById('cancelBtn').hidden = true;
         }
 
+        // CANCEL EDIT
         function cancelEdit() {
             resetForm();
             showMessage('Edit cancelled.');
@@ -655,13 +708,18 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Unable to delete student.');
+                    throw new Error(
+                        data.error || 'Unable to delete student.'
+                    );
                 }
 
-                showMessage(data.message || 'Student deleted successfully.');
+                showMessage(
+                    data.message || 'Student deleted successfully.'
+                );
 
                 if (
-                    document.getElementById('recordId').value === String(id)
+                    document.getElementById('recordId').value ===
+                    String(id)
                 ) {
                     resetForm();
                 }
@@ -692,6 +750,10 @@
                     );
                 }
 
+                if (!Array.isArray(students)) {
+                    throw new Error('Invalid student data received.');
+                }
+
                 results.replaceChildren();
 
                 if (students.length === 0) {
@@ -716,53 +778,40 @@
             }
         }
 
-        // SECTION 7: RETRIEVE CLASSMATE'S RECORDS
+        // SECTION 7: LOAD CLASSMATE'S RECORDS THROUGH FLASK PROXY
         async function loadClassmateRecords() {
-            const apiUrl = document
-                .getElementById('classmateApiUrl')
-                .value.trim();
-
             const container =
                 document.getElementById('classmateRecords');
 
             const message =
                 document.getElementById('classmateMessage');
 
-            if (!apiUrl) {
-                message.className = 'error';
-                message.textContent =
-                    "Please enter your classmate's API URL.";
-                return;
-            }
-
-            if (!/^https?:\/\//i.test(apiUrl)) {
-                message.className = 'error';
-                message.textContent =
-                    'Enter a valid HTTP or HTTPS API URL.';
-                return;
-            }
-
             container.textContent = 'Loading classmate records...';
             message.textContent = '';
+            message.className = '';
 
             try {
-                const response = await fetch(apiUrl);
+                // Use your own Flask server to avoid browser CORS issues.
+                const response = await fetch('/api/classmate-students');
+
+                const data = await response.json();
 
                 if (!response.ok) {
                     throw new Error(
-                        `API request failed: ${response.status}`
+                        data.error ||
+                        'Unable to retrieve classmate records.'
                     );
                 }
 
-                const records = await response.json();
-
-                if (!Array.isArray(records)) {
+                if (!Array.isArray(data)) {
                     throw new Error(
-                        'The API did not return a list of records.'
+                        'The classmate API did not return a list of records.'
                     );
                 }
 
-                if (records.length === 0) {
+                container.replaceChildren();
+
+                if (data.length === 0) {
                     container.textContent = 'No classmate records found.';
                     message.className = 'success';
                     message.textContent = 'API request successful.';
@@ -773,7 +822,15 @@
                 const thead = table.createTHead();
                 const tbody = table.createTBody();
                 const headerRow = thead.insertRow();
-                const headers = Object.keys(records[0]);
+
+                // Include every field returned by the API.
+                const headers = [
+                    ...new Set(
+                        data.flatMap(record =>
+                            Object.keys(record)
+                        )
+                    )
+                ];
 
                 headers.forEach(header => {
                     const th = document.createElement('th');
@@ -781,24 +838,30 @@
                     headerRow.appendChild(th);
                 });
 
-                records.forEach(record => {
+                data.forEach(record => {
                     const row = tbody.insertRow();
 
                     headers.forEach(header => {
                         const cell = row.insertCell();
-                        cell.textContent = record[header] ?? '';
+                        const value = record[header];
+
+                        cell.textContent =
+                            value == null ? '' :
+                            typeof value === 'object'
+                                ? JSON.stringify(value)
+                                : String(value);
                     });
                 });
 
-                container.replaceChildren(table);
+                container.appendChild(table);
 
                 message.className = 'success';
                 message.textContent =
-                    `Successfully loaded ${records.length} classmate record(s).`;
+                    `Successfully loaded ${data.length} classmate record(s).`;
 
             } catch (error) {
                 container.textContent =
-                    'Unable to load classmate records. Check the API URL or CORS settings.';
+                    'Unable to load classmate records.';
 
                 message.className = 'error';
                 message.textContent = error.message;
