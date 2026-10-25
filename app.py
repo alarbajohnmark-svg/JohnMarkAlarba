@@ -12,7 +12,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Your classmate's public API URL
 CLASSMATE_API_URL = (
-    "https://kleinjasperagrabio.onrender.com/api/students"
+    "https://jasminerose-2.onrender.com/api/students"
 )
 
 
