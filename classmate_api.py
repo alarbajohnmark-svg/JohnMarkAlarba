@@ -2,7 +2,7 @@
 import requests
 
 # Replace this with your classmate's actual API endpoint
-url = "https://balcenajessicaann.onrender.com/profile"
+url = "https://kleinjasperagrabio.onrender.com/api/students"
 
 try:
     response = requests.get(url, timeout=30)
